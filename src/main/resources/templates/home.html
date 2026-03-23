@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Trang chủ - Đăng ký học phần</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}">
+            <i class="bi bi-book-half me-2"></i>HUTECH Course
+        </a>
+        <div class="d-flex align-items-center">
+            <div sec:authorize="isAuthenticated()" class="d-flex align-items-center">
+                <a sec:authorize="hasAuthority('ADMIN')" th:href="@{/admin/courses}" class="btn btn-outline-warning btn-sm me-3">
+                    <i class="bi bi-gear-fill me-1"></i>Quản lý Admin
+                </a>
+                <span class="text-white me-3">
+                        Xin chào, <span class="fw-bold text-info" sec:authentication="name"></span>
+                    </span>
+                <form th:action="@{/logout}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Đăng xuất</button>
+                </form>
+            </div>
+            <div sec:authorize="isAnonymous()">
+                <a th:href="@{/login}" class="btn btn-primary btn-sm me-2">Đăng nhập</a>
+                <a th:href="@{/register}" class="btn btn-success btn-sm">Đăng ký</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div th:if="${param.enrolled}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        Chúc mừng! Bạn đã đăng ký học phần thành công.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h4 class="card-title mb-0 text-primary fw-bold">Danh sách học phần</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle border">
+                    <thead class="table-light">
+                    <tr>
+                        <th class="text-center" style="width: 100px;">Hình ảnh</th>
+                        <th>Tên học phần</th>
+                        <th class="text-center" style="width: 100px;">Tín chỉ</th>
+                        <th>Giảng viên</th>
+                        <th sec:authorize="hasAuthority('STUDENT')" class="text-center" style="width: 150px;">Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="course : ${courses}">
+                        <td class="text-center">
+                            <img th:src="${course.image != null && !course.image.isEmpty() ? course.image : 'https://via.placeholder.com/80x80?text=Course'}"
+                                 class="rounded shadow-sm" style="width: 60px; height: 60px; object-fit: cover;">
+                        </td>
+                        <td class="fw-semibold text-dark" th:text="${course.name}"></td>
+                        <td class="text-center">
+                            <span class="badge bg-info text-dark" th:text="${course.credits}"></span>
+                        </td>
+                        <td th:text="${course.lecturer}"></td>
+                        <td sec:authorize="hasAuthority('STUDENT')" class="text-center">
+                            <a th:href="@{/enroll/{id}(id=${course.id})}"
+                               class="btn btn-success btn-sm px-3 shadow-sm"
+                               onclick="return confirm('Bạn xác nhận đăng ký học phần này?')">
+                                <i class="bi bi-plus-circle me-1"></i>Enroll
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <nav th:if="${totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                        <a class="page-link shadow-none" th:href="@{/(page=${currentPage - 1})}">Trước</a>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link" th:text="${currentPage + 1} + ' / ' + ${totalPages}"></span>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}">
+                        <a class="page-link shadow-none" th:href="@{/(page=${currentPage + 1})}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
